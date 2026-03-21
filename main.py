@@ -16,13 +16,23 @@ class WwkudiePlugin(Star):
         logger.info(f"尽孝插件已初始化")
 
     @filter.command("尽孝")
-    async def wwkudie_command(self, event: AstrMessageEvent, message: str = ""):
-        if not message:
+    async def wwkudie_command(self, event: AstrMessageEvent):
+        full_message = event.message_str.strip()
+        
+        if not full_message:
             yield event.plain_result("请提供游戏名和事件描述！\n使用方式：/尽孝 游戏名 事件描述")
             return
-
+        
+        parts = full_message.split()
+        if len(parts) < 2:
+            yield event.plain_result("请提供游戏名和事件描述！\n使用方式：/尽孝 游戏名 事件描述")
+            return
+        
+        game_name = parts[0]
+        event_desc = ' '.join(parts[1:])
+        
         try:
-            yield event.plain_result("🖊️ 正在写文章...")
+            yield event.plain_result(f"🖊️ 正在为 {game_name} 写文章...")
             
             umo = event.unified_msg_origin
             provider_id = await self.context.get_current_chat_provider_id(umo=umo)
@@ -31,7 +41,7 @@ class WwkudiePlugin(Star):
                 yield event.plain_result("错误：未找到 LLM 提供商")
                 return
 
-            full_prompt = f"{SYSTEM_PROMPT}\n\n{build_article_prompt(message)}"
+            full_prompt = f"{SYSTEM_PROMPT}\n\n游戏：{game_name}\n事件：{event_desc}\n\n请根据上述游戏和事件，撰写一篇符合风格要求的深度评论文章。"
             
             llm_resp = await self.context.llm_generate(
                 chat_provider_id=provider_id,
