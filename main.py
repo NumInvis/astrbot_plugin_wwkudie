@@ -39,7 +39,7 @@ class WwkudiePlugin(Star):
         message = f"{game_name} {event_desc}"
 
         try:
-            yield event.plain_result(f"🖊️ 正在为 {game_name} 写文章...")
+            yield event.plain_result("🖊️ 正在尽孝...")
 
             umo = event.unified_msg_origin
             provider_id = await self.context.get_current_chat_provider_id(umo=umo)
