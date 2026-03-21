@@ -16,19 +16,27 @@ class WwkudiePlugin(Star):
         logger.info("尽孝插件已初始化")
 
     @filter.command("尽孝")
-    async def wwkudie_command(self, event: AstrMessageEvent, message: str = ""):
-        message = message.strip()
-        if not message:
+    async def wwkudie_command(self, event: AstrMessageEvent):
+        full_msg = event.message_str.strip()
+        
+        if not full_msg:
             yield event.plain_result("请提供游戏名和事件描述！\n使用方式：/尽孝 游戏名 事件描述")
             return
-
-        parts = message.split()
-        if len(parts) < 2:
+        
+        parts = full_msg.split()
+        
+        content_parts = []
+        for part in parts:
+            if not part.startswith(('/', '!', '＃', '#')):
+                content_parts.append(part)
+        
+        if len(content_parts) < 2:
             yield event.plain_result("请提供游戏名和事件描述！\n使用方式：/尽孝 游戏名 事件描述")
             return
-
-        game_name = parts[0]
-        event_desc = ' '.join(parts[1:])
+        
+        game_name = content_parts[0]
+        event_desc = ' '.join(content_parts[1:])
+        message = f"{game_name} {event_desc}"
 
         try:
             yield event.plain_result(f"🖊️ 正在为 {game_name} 写文章...")
