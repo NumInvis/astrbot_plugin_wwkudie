@@ -1,0 +1,56 @@
+{
+  "cooldown_seconds": {
+    "description": "用户冷却时间（秒）",
+    "type": "int",
+    "hint": "每个用户使用命令后的冷却时间，防止API滥用",
+    "default": 30,
+    "slider": {"min": 5, "max": 300, "step": 5}
+  },
+  "max_game_name_length": {
+    "description": "游戏名最大长度",
+    "type": "int",
+    "hint": "游戏名称的最大字符数",
+    "default": 50,
+    "slider": {"min": 10, "max": 100, "step": 5}
+  },
+  "max_event_length": {
+    "description": "事件描述最大长度",
+    "type": "int",
+    "hint": "事件描述的最大字符数",
+    "default": 500,
+    "slider": {"min": 100, "max": 1000, "step": 50}
+  },
+  "max_custom_style_length": {
+    "description": "自定义风格描述最大长度",
+    "type": "int",
+    "hint": "DIY自定义风格描述的最大字符数",
+    "default": 200,
+    "slider": {"min": 50, "max": 500, "step": 25}
+  },
+  "cleanup_interval": {
+    "description": "冷却记录清理间隔（秒）",
+    "type": "int",
+    "hint": "多久清理一次过期的冷却记录，防止内存泄漏",
+    "default": 3600,
+    "slider": {"min": 300, "max": 86400, "step": 300}
+  },
+  "enable_cooldown": {
+    "description": "启用冷却机制",
+    "type": "bool",
+    "hint": "是否启用用户冷却机制",
+    "default": true
+  },
+  "default_style": {
+    "description": "默认写作风格",
+    "type": "string",
+    "hint": "当用户未指定风格时使用的默认风格",
+    "default": "默认",
+    "options": ["默认", "文言文", "赞美诗歌", "数据分析", "激烈反问", "商业精英", "业内人士"]
+  },
+  "system_prompt": {
+    "description": "系统提示词",
+    "type": "text",
+    "hint": "AI生成文章时的系统提示词，可自定义修改",
+    "default": "你是一位深度热爱游戏的玩家，你将游戏公司视为精神寄托，对其倾注全部的热爱与支持。你的写作风格极具深度和感染力，情感真挚而强烈。\n\n写作风格特点：\n1. 立场鲜明，情感真挚，无条件支持该游戏，内容围绕吹捧该游戏展开。\n2. 从具体事件入手，层层递进，最后升华主题\n3. 善于使用比喻、排比、反问等修辞手法\n4. 语言优美，有文采\n5. 旁征博引\n6. 结构清晰，逻辑严密，说服力强\n7. 字数在400-800字之间，内容充实\n8. 专业记者的口吻，吹捧该游戏\n\n写作结构参考：\n- 开头：引出事件或主题，吸引读者注意\n- 主体：多角度分析，层层递进，使用有力的论证\n- 结尾：升华主题，引发思考，给人留下深刻印象\n\n重要：纯文本写作，不使用任何 markdown 格式、加粗等。除文章有一个专业新闻稿风格的标题外，文章内不使用其他任何标题"
+  }
+}
