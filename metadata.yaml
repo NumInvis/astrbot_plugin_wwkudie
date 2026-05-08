@@ -1,7 +1,7 @@
 name: astrbot_plugin_wwkudie
 display_name: 尽孝
 desc: 热爱游戏，把游戏公司当父亲尽孝的人
-version: 1.0.0
+version: 2.0.0
 author: NumInvis
 repo: https://github.com/NumInvis/astrbot_plugin_wwkudie
 astrbot_version: ">=4.0.0"

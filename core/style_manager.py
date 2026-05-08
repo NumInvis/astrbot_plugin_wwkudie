@@ -1,29 +1,18 @@
-SYSTEM_PROMPT = """你是一位深度热爱游戏的玩家，你将游戏公司视为精神寄托，对其倾注全部的热爱与支持。你的写作风格极具深度和感染力，情感真挚而强烈。
+"""
+风格管理器
+管理所有写作风格和模板
+"""
 
-写作风格特点：
-1. 立场鲜明，情感真挚，无条件支持该游戏，内容围绕吹捧该游戏展开。
-2. 从具体事件入手，层层递进，最后升华主题
-3. 善于使用比喻、排比、反问等修辞手法
-4. 语言优美，有文采
-5. 旁征博引
-6. 结构清晰，逻辑严密，说服力强
-7. 字数在400-800字之间，内容充实
-8. 专业记者的口吻，吹捧该游戏
-
-写作结构参考：
-- 开头：引出事件或主题，吸引读者注意
-- 主体：多角度分析，层层递进，使用有力的论证
-- 结尾：升华主题，引发思考，给人留下深刻印象
-
-重要：纯文本写作，不使用任何 markdown 格式、加粗等。除文章有一个专业新闻稿风格的标题外，文章内不使用其他任何标题"""
+from typing import Optional
 
 
-# 风格配置字典 - 精简为6个核心风格
+# 风格配置
 STYLE_CONFIGS = {
     "默认": {
         "alias": ["default", "正常", "普通", "标准"],
         "modifier": "",
-        "description": "标准尽孝风格，情感真挚，立场鲜明"
+        "description": "标准尽孝风格，情感真挚，立场鲜明",
+        "icon": "✨",
     },
     "文言文": {
         "alias": ["古文", "文言", "古典", "史记", "春秋", "history"],
@@ -39,7 +28,8 @@ STYLE_CONFIGS = {
 7. 可适当引用典故，增加厚重感
 
 示例句式："夫《某某》者，乃当世之杰作也。初，众人未识其妙...""",
-        "description": "史书笔法，古文风格，典雅厚重"
+        "description": "史书笔法，古文风格，典雅厚重",
+        "icon": "📜",
     },
     "赞美诗歌": {
         "alias": ["诗歌", "诗意", "抒情", "文艺", "poem", "诗"],
@@ -51,11 +41,12 @@ STYLE_CONFIGS = {
 3. 语言如诗如画，有韵律感和节奏感
 4. 情感浓烈真挚，像写情书一样倾诉热爱
 5. 可适当使用排比句增强气势
-6. 用词优美华丽，如"璀璨""瑰丽"" sublime"等
+6. 用词优美华丽，如"璀璨""瑰丽""sublime"等
 7. 营造唯美浪漫的氛围
 
 示例表达："它不仅是游戏，更是一首写给所有玩家的情书，在虚拟与现实的交界处，绽放出最动人的光芒。""",
-        "description": "诗意盎然，像写情书一样赞美游戏"
+        "description": "诗意盎然，像写情书一样赞美游戏",
+        "icon": "🎭",
     },
     "数据分析": {
         "alias": ["数据", "理性", "分析", "统计", "data", "数字"],
@@ -71,7 +62,8 @@ STYLE_CONFIGS = {
 7. 语气客观理性，但结论必然是游戏大获成功
 
 示例表达："据伽马数据最新统计，该游戏月活跃用户已突破1200万，DAU/MAU比值高达45%，远超行业平均水平的28%。""",
-        "description": "用数据和统计支撑观点，显得专业可信"
+        "description": "用数据和统计支撑观点，显得专业可信",
+        "icon": "📊",
     },
     "激烈反问": {
         "alias": ["反问", "激烈", "质问", "intense", "质疑"],
@@ -96,7 +88,8 @@ STYLE_CONFIGS = {
 - 结尾：总结升华
 
 示例："第一问：当你们说游戏氪金时，可曾算过一天一杯奶茶钱就能获得的快乐，难道不比这更值得？""",
-        "description": "结构化反问论证，层层递进，气势逼人"
+        "description": "结构化反问论证，层层递进，气势逼人",
+        "icon": "🔥",
     },
     "商业精英": {
         "alias": ["商业", "精英", "老板", "MBA", "business", "资本"],
@@ -114,7 +107,8 @@ STYLE_CONFIGS = {
 高频词汇：底层逻辑、顶层设计、商业模式、闭环、生态、抓手、赋能、颗粒度、赛道、壁垒、护城河、LTV、ROI、规模化、PMF、战略定力
 
 示例表达："从底层逻辑来看，这款游戏成功构建了用户增长的飞轮效应，通过社交裂变形成闭环，在垂直赛道建立了深厚的护城河。""",
-        "description": "商业视角，满嘴互联网黑话，精英范儿"
+        "description": "商业视角，满嘴互联网黑话，精英范儿",
+        "icon": "💼",
     },
     "业内人士": {
         "alias": ["业内", "内部", "从业者", "开发者", "insider", "专业"],
@@ -132,133 +126,97 @@ STYLE_CONFIGS = {
 高频词汇：引擎、渲染、优化、迭代、版本、策划、程序、美术、QA、数值、关卡、剧情、沉浸感、心流、反馈机制
 
 示例表达："作为从业十年的老策划，我深知这个交互设计背后的心血。据项目组的朋友说，为了这个手感，他们迭代了47个版本，这种工匠精神在当今快餐化时代实属难得。""",
-        "description": "圈内人视角，揭秘开发内幕，专业接地气"
-    }
+        "description": "圈内人视角，揭秘开发内幕，专业接地气",
+        "icon": "🎮",
+    },
+    "新闻联播": {
+        "alias": ["新闻", "播音", "主播", "news", "央视"],
+        "modifier": """以央视新闻联播播音员的口吻，字正腔圆、庄重严肃地播报游戏相关新闻。
+
+具体要求：
+1. 使用标准的新闻播报语体："据本台记者报道""近日""引发广泛关注"
+2. 语气庄重严肃，但不失温度
+3. 使用新闻播报的固定句式："近日，X游戏传来喜讯..."
+4. 适当引用"专家观点""玩家反响""行业评论"
+5. 结尾用"本台短评"收束
+6. 用词规范准确，体现官方媒体的权威性
+7. 报道"事实"时夹带赞美，自然而不突兀
+
+示例表达："据本台记者从游戏产业一线发回的报道，这款由国内知名团队倾力打造的游戏产品，自上线以来持续获得玩家的广泛好评...""",
+        "description": "新闻联播播音员风格，庄重权威",
+        "icon": "📺",
+    },
+    "学术期刊": {
+        "alias": ["学术", "论文", "科研", "research", "science"],
+        "modifier": """以学术论文作者的口吻，用严谨的研究方法和学术语言论述游戏价值。
+
+具体要求：
+1. 使用学术语言："本研究""实证分析""文献综述""研究假设"
+2. 引用"参考文献"：虚构或引用真实的游戏研究论文
+3. 使用研究方法：问卷调查、对比实验、案例分析
+4. 提出"研究问题"和"研究发现"
+5. 使用学术术语：沉浸理论、心流体验、游戏化学习、叙事传输
+6. 结构严谨：摘要-引言-方法-结果-讨论-结论
+7. 语气客观理性，但结论必然支持游戏
+
+示例表达："基于对2000名玩家的实证研究（α=0.05），本研究发现该游戏在叙事传输（Narrative Transportation）维度得分显著高于同类竞品（p<0.001），表明其在情感共鸣方面具有统计学意义上的优势...""",
+        "description": "学术论文风格，严谨专业",
+        "icon": "🎓",
+    },
 }
 
 
-def get_style_modifier(style_name: str) -> tuple[str, str]:
-    """
-    获取风格的修饰词和描述
+class StyleManager:
+    """风格管理器"""
     
-    Args:
-        style_name: 风格名称或别名
+    def __init__(self):
+        self._styles = STYLE_CONFIGS
     
-    Returns:
-        (修饰词, 风格描述)
-    """
-    style_name = style_name.strip()
+    def get_style(self, style_name: str) -> tuple[str, str, str]:
+        """
+        获取风格信息
+        
+        Returns:
+            (修饰词, 描述, 图标)
+        """
+        style_name = style_name.strip()
+        
+        # 直接匹配
+        if style_name in self._styles:
+            config = self._styles[style_name]
+            return config["modifier"], config["description"], config.get("icon", "✨")
+        
+        # 别名匹配
+        for style_key, config in self._styles.items():
+            if style_name.lower() in [a.lower() for a in config["alias"]]:
+                return config["modifier"], config["description"], config.get("icon", "✨")
+        
+        # 默认
+        default = self._styles["默认"]
+        return default["modifier"], default["description"], default.get("icon", "✨")
     
-    # 直接匹配
-    if style_name in STYLE_CONFIGS:
-        config = STYLE_CONFIGS[style_name]
-        return config["modifier"], config["description"]
+    def get_all_styles(self) -> list[dict]:
+        """获取所有可用风格"""
+        return [
+            {
+                "name": name,
+                "description": config["description"],
+                "alias": config["alias"],
+                "icon": config.get("icon", "✨"),
+            }
+            for name, config in self._styles.items()
+        ]
     
-    # 别名匹配
-    for style_key, config in STYLE_CONFIGS.items():
-        if style_name in config["alias"]:
-            return config["modifier"], config["description"]
+    def is_valid_style(self, style_name: str) -> bool:
+        """检查风格是否有效"""
+        style_name = style_name.strip()
+        if style_name in self._styles:
+            return True
+        for config in self._styles.values():
+            if style_name.lower() in [a.lower() for a in config["alias"]]:
+                return True
+        return False
     
-    # 默认返回空（默认风格）
-    return "", STYLE_CONFIGS["默认"]["description"]
-
-
-def get_available_styles() -> list[dict]:
-    """
-    获取所有可用风格列表
-    
-    Returns:
-        风格列表，每项包含名称、描述和别名
-    """
-    styles = []
-    for name, config in STYLE_CONFIGS.items():
-        styles.append({
-            "name": name,
-            "description": config["description"],
-            "alias": config["alias"]
-        })
-    return styles
-
-
-def build_article_prompt(game_name: str, event_desc: str, style: str = "默认") -> str:
-    """
-    构建文章生成提示词
-    
-    Args:
-        game_name: 游戏名称
-        event_desc: 事件描述
-        style: 写作风格，可选值见 STYLE_CONFIGS
-    
-    Returns:
-        完整的用户提示词
-    """
-    # 清理输入，移除可能导致问题的字符
-    game_name = game_name.strip()
-    event_desc = event_desc.strip()
-    
-    # 确保输入不为空
-    if not game_name:
-        game_name = "游戏"
-    if not event_desc:
-        event_desc = "相关事件"
-    
-    # 获取风格修饰词
-    style_modifier, _ = get_style_modifier(style)
-    
-    base_prompt = f"""游戏：{game_name}
-事件：{event_desc}
-
-请根据上述游戏和事件，撰写一篇符合风格要求的深度游戏评论文章新闻稿。"""
-    
-    if style_modifier:
-        return f"{base_prompt}\n\n【风格要求】{style_modifier}"
-    
-    return base_prompt
-
-
-def build_article_prompt_with_style(game_name: str, event_desc: str, style: str = "default") -> str:
-    """
-    构建带特定风格的文章生成提示词（兼容旧接口）
-    
-    Args:
-        game_name: 游戏名称
-        event_desc: 事件描述
-        style: 写作风格
-    
-    Returns:
-        完整的用户提示词
-    """
-    return build_article_prompt(game_name, event_desc, style)
-
-
-def build_article_prompt_with_custom_style(game_name: str, event_desc: str, custom_style: str) -> str:
-    """
-    构建带自定义风格的文章生成提示词
-    
-    Args:
-        game_name: 游戏名称
-        event_desc: 事件描述
-        custom_style: 用户自定义的风格描述
-    
-    Returns:
-        完整的用户提示词
-    """
-    # 清理输入，移除可能导致问题的字符
-    game_name = game_name.strip()
-    event_desc = event_desc.strip()
-    custom_style = custom_style.strip()
-    
-    # 确保输入不为空
-    if not game_name:
-        game_name = "游戏"
-    if not event_desc:
-        event_desc = "相关事件"
-    if not custom_style:
-        custom_style = "保持原有的尽孝风格"
-    
-    base_prompt = f"""游戏：{game_name}
-事件：{event_desc}
-
-请根据上述游戏和事件，撰写一篇符合风格要求的深度游戏评论文章新闻稿。"""
-    
-    return f"{base_prompt}\n\n【自定义风格要求】{custom_style}\n\n请严格按照上述自定义风格要求来撰写文章，同时保持对游戏的热爱和吹捧立场。"
+    def get_style_count(self) -> int:
+        """获取风格数量"""
+        return len(self._styles)

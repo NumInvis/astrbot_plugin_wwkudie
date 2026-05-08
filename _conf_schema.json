@@ -27,6 +27,13 @@
     "default": 200,
     "slider": {"min": 50, "max": 500, "step": 25}
   },
+  "max_article_length": {
+    "description": "生成文章最大长度",
+    "type": "int",
+    "hint": "AI生成文章的最大字符数，超过会被截断",
+    "default": 2000,
+    "slider": {"min": 500, "max": 5000, "step": 100}
+  },
   "cleanup_interval": {
     "description": "冷却记录清理间隔（秒）",
     "type": "int",
@@ -40,12 +47,45 @@
     "hint": "是否启用用户冷却机制",
     "default": true
   },
+  "enable_rate_limit": {
+    "description": "启用限流机制",
+    "type": "bool",
+    "hint": "是否启用每小时请求次数限制",
+    "default": true
+  },
+  "rate_limit_count": {
+    "description": "每小时最大请求次数",
+    "type": "int",
+    "hint": "每个用户每小时最多可以使用多少次",
+    "default": 10,
+    "slider": {"min": 5, "max": 100, "step": 5}
+  },
+  "rate_limit_window": {
+    "description": "限流时间窗口（秒）",
+    "type": "int",
+    "hint": "限流统计的时间窗口",
+    "default": 3600,
+    "slider": {"min": 600, "max": 86400, "step": 600}
+  },
   "default_style": {
     "description": "默认写作风格",
     "type": "string",
     "hint": "当用户未指定风格时使用的默认风格",
     "default": "默认",
-    "options": ["默认", "文言文", "赞美诗歌", "数据分析", "激烈反问", "商业精英", "业内人士"]
+    "options": ["默认", "文言文", "赞美诗歌", "数据分析", "激烈反问", "商业精英", "业内人士", "新闻联播", "学术期刊"]
+  },
+  "enable_history": {
+    "description": "启用历史记录",
+    "type": "bool",
+    "hint": "是否保存用户的历史生成记录",
+    "default": true
+  },
+  "max_history_per_user": {
+    "description": "每用户最大历史记录数",
+    "type": "int",
+    "hint": "每个用户最多保存多少条历史记录",
+    "default": 10,
+    "slider": {"min": 5, "max": 50, "step": 5}
   },
   "system_prompt": {
     "description": "系统提示词",
