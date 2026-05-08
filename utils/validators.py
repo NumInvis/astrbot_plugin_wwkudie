@@ -46,40 +46,6 @@ class InputValidator:
         return True, ""
     
     @staticmethod
-    def validate_compare_input(
-        game_name: str,
-        events: list[str],
-        max_game_name_length: int = 50,
-        max_event_length: int = 500,
-        max_events: int = 5,
-    ) -> tuple[bool, str]:
-        """
-        验证对比分析输入
-        
-        Returns:
-            (是否有效, 错误信息)
-        """
-        if not game_name or not game_name.strip():
-            return False, "游戏名不能为空"
-        
-        if len(game_name) > max_game_name_length:
-            return False, f"游戏名太长啦，请控制在{max_game_name_length}字以内"
-        
-        if not events or len(events) < 2:
-            return False, "请至少提供2个事件进行对比分析"
-        
-        if len(events) > max_events:
-            return False, f"最多支持{max_events}个事件进行对比"
-        
-        for i, event in enumerate(events):
-            if not event or not event.strip():
-                return False, f"第{i+1}个事件描述不能为空"
-            if len(event) > max_event_length:
-                return False, f"第{i+1}个事件描述太长啦，请控制在{max_event_length}字以内"
-        
-        return True, ""
-    
-    @staticmethod
     def sanitize_command_args(args: list[str]) -> list[str]:
         """清理命令参数"""
         return [arg.strip() for arg in args if arg.strip()]

@@ -131,42 +131,6 @@ class WwkudiePlugin(Star):
         
         return game_name, event_desc, style, ""
     
-    def _parse_compare_args(self, content: str) -> tuple[str, list[str], str]:
-        """
-        解析对比分析命令参数
-        
-        Args:
-            content: 命令内容
-        
-        Returns:
-            (游戏名, 事件列表, 风格)
-        """
-        if not content:
-            return "", [], self._config.get("default_style", "默认")
-        
-        parts = content.split()
-        
-        if len(parts) < 3:
-            return "", [], self._config.get("default_style", "默认")
-        
-        game_name = parts[0]
-        
-        # 检查最后一部分是否是风格
-        potential_style = parts[-1]
-        is_known_style = self._style_manager.is_valid_style(potential_style)
-        
-        if is_known_style:
-            events_text = " ".join(parts[1:-1])
-            style = potential_style
-        else:
-            events_text = " ".join(parts[1:])
-            style = self._config.get("default_style", "默认")
-        
-        # 按分隔符分割事件
-        events = [e.strip() for e in events_text.split("|") if e.strip()]
-        
-        return game_name, events, style
-    
     # ==================== 命令处理 ====================
     
     @filter.command("尽孝")
@@ -251,70 +215,6 @@ class WwkudiePlugin(Star):
         else:
             yield event.plain_result(result)
     
-    @filter.command("尽孝对比")
-    async def wwkudie_compare(self, event: AstrMessageEvent):
-        """尽孝对比命令 - 生成对比分析文章（新功能）"""
-        user_id = event.get_sender_id()
-        
-        # 权限检查
-        can_use, error_msg = await self._check_permission(user_id)
-        if not can_use:
-            yield event.plain_result(error_msg)
-            return
-        
-        content = event.message_str.strip()
-        
-        if not content:
-            yield event.plain_result(
-                "请提供游戏名和多个事件！\n"
-                "使用方式：/尽孝对比 游戏名 事件1|事件2|事件3 [风格]\n\n"
-                "示例：/尽孝对比 鸣潮 新角色上线|剧情获好评|福利送得多"
-            )
-            return
-        
-        # 解析参数
-        game_name, events, style = self._parse_compare_args(content)
-        
-        # 验证输入
-        is_valid, error_msg = InputValidator.validate_compare_input(
-            game_name=game_name,
-            events=events,
-            max_game_name_length=self._config.get("max_game_name_length", 50),
-            max_event_length=self._config.get("max_event_length", 500),
-        )
-        if not is_valid:
-            yield event.plain_result(f"❌ {error_msg}")
-            return
-        
-        # 记录请求
-        await self._cooldown.record_request(user_id)
-        
-        _, _, icon = self._style_manager.get_style(style)
-        style_display = f"{icon} {style}" if style != "默认" else "默认风格"
-        
-        yield event.plain_result(f"🖊️ 正在对比分析... [{style_display}]\n📊 事件数: {len(events)}")
-        
-        # 生成对比文章
-        success, result = await self._generator.generate_compare(
-            event=event,
-            game_name=game_name,
-            events=events,
-            style=style,
-        )
-        
-        if success:
-            if self._config.get("enable_history", True):
-                self._history.add_record(
-                    user_id=user_id,
-                    game_name=game_name,
-                    event_desc=f"对比: {' | '.join(events)}",
-                    style=f"对比-{style}",
-                    article=result,
-                )
-            yield event.plain_result(result)
-        else:
-            yield event.plain_result(result)
-    
     @filter.command("尽孝风格")
     async def wwkudie_styles(self, event: AstrMessageEvent):
         """显示所有可用风格"""
@@ -336,12 +236,9 @@ class WwkudiePlugin(Star):
             "\n💡 使用方式：",
             "/尽孝 游戏名 事件描述 [风格]",
             "/尽孝 游戏名 事件 diy 你的风格要求",
-            "\n📊 对比分析：",
-            "/尽孝对比 游戏名 事件1|事件2|事件3 [风格]",
             "\n示例：",
             "/尽孝 鸣潮 新角色上线 激烈反问",
             "/尽孝 原神 版本更新 diy 用鲁迅的口吻写",
-            "/尽孝对比 鸣潮 新角色上线|剧情获好评|福利送得多",
         ])
         
         yield event.plain_result("\n".join(lines))
@@ -454,10 +351,6 @@ class WwkudiePlugin(Star):
 /尽孝 原神 3.0版本须弥开放 激烈反问
 /尽孝 王者荣耀 新英雄上线 数据分析
 /尽孝 崩坏星穹铁道 剧情太刀 diy 用鲁迅的口吻写
-
-📊 对比分析（新功能）：
-/尽孝对比 游戏名 事件1|事件2|事件3 [风格]
-/尽孝对比 鸣潮 新角色上线|剧情获好评|福利送得多
 
 🎨 内置风格（/尽孝风格 查看全部）：
 • 默认 - 标准尽孝风格

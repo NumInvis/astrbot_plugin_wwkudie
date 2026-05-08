@@ -142,38 +142,4 @@ class PromptBuilder:
         
         return base_prompt
     
-    def build_compare_prompt(
-        self,
-        game_name: str,
-        events: list[str],
-        style: str = "默认",
-    ) -> str:
-        """
-        构建对比分析提示词（新功能）
-        
-        Args:
-            game_name: 游戏名称
-            events: 多个事件描述列表
-            style: 写作风格
-        
-        Returns:
-            对比分析提示词
-        """
-        game_name = self.sanitize_input(game_name, max_length=100)
-        events = [self.sanitize_input(e, max_length=500) for e in events]
-        
-        events_text = "\n".join([f"{i+1}. {event}" for i, event in enumerate(events) if event])
-        
-        base_prompt = f"""游戏：{game_name}
 
-以下是对该游戏的多个相关事件/话题：
-{events_text}
-
-请根据上述事件，撰写一篇综合分析文章，从多个角度论证这款游戏的优秀之处。文章需要有统一的观点，将各个事件串联起来，展现游戏的全方位优势。"""
-        
-        style_modifier, _, _ = self._style_manager.get_style(style)
-        
-        if style_modifier:
-            return f"{base_prompt}\n\n【风格要求】{style_modifier}"
-        
-        return base_prompt

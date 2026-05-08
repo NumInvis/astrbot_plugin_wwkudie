@@ -152,66 +152,6 @@ class ArticleGenerator:
             logger.error(f"文章生成错误: {str(e)}", exc_info=True)
             return False, self._format_error_message(e)
     
-    async def generate_compare(
-        self,
-        event: AstrMessageEvent,
-        game_name: str,
-        events: list[str],
-        style: str = "默认",
-    ) -> tuple[bool, str]:
-        """
-        生成对比分析文章
-        
-        Args:
-            event: 消息事件
-            game_name: 游戏名称
-            events: 事件列表
-            style: 写作风格
-        
-        Returns:
-            (是否成功, 结果文本)
-        """
-        try:
-            system_prompt = self._prompt_builder.build_system_prompt(
-                self._config.get("system_prompt")
-            )
-            
-            user_prompt = self._prompt_builder.build_compare_prompt(
-                game_name=game_name,
-                events=events,
-                style=style,
-            )
-            
-            full_prompt = f"{system_prompt}\n\n{user_prompt}"
-            
-            umo = event.unified_msg_origin
-            provider_id = await self._context.get_current_chat_provider_id(umo=umo)
-            
-            if not provider_id:
-                return False, "❌ 错误：未找到 LLM 提供商，请先配置AI模型"
-            
-            llm_resp = await self._context.llm_generate(
-                chat_provider_id=provider_id,
-                prompt=full_prompt,
-            )
-            
-            response_text = self._parser.parse(llm_resp)
-            
-            if response_text:
-                max_length = self._config.get("max_article_length", 2000)
-                if len(response_text) > max_length:
-                    response_text = response_text[:max_length] + "\n\n[文章已截断]"
-                return True, response_text
-            else:
-                return False, "❌ 生成失败：无法解析AI响应"
-        
-        except asyncio.TimeoutError:
-            return False, "⏰ 生成超时，请稍后再试"
-        
-        except Exception as e:
-            logger.error(f"对比分析生成错误: {str(e)}", exc_info=True)
-            return False, self._format_error_message(e)
-    
     @staticmethod
     def _format_error_message(error: Exception) -> str:
         """格式化错误信息"""
