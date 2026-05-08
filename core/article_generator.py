@@ -129,12 +129,6 @@ class ArticleGenerator:
             response_text = self._parser.parse(llm_resp)
             
             if response_text:
-                # 检查文章长度
-                max_length = self._config.get("max_article_length", 2000)
-                if len(response_text) > max_length:
-                    logger.warning(f"生成的文章过长 ({len(response_text)} 字)，已截断")
-                    response_text = response_text[:max_length] + "\n\n[文章已截断]"
-                
                 return True, response_text
             else:
                 if llm_resp is None:

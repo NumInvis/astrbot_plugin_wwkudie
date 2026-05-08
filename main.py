@@ -13,13 +13,10 @@ from astrbot.api.star import Context, Star, register
 
 from ._version import __version__, __plugin_name__, __plugin_desc__, __author__
 from .core.config_manager import ConfigManager
-from .core.cooldown_manager import CooldownManager
 from .core.style_manager import StyleManager
 from .core.prompt_builder import PromptBuilder
 from .core.article_generator import ArticleGenerator
 from .core.history_manager import HistoryManager
-from .utils.validators import InputValidator
-from .utils.exceptions import ValidationError, CooldownError, RateLimitError
 
 
 @register(__plugin_name__, __author__, __plugin_desc__, __version__)
@@ -31,16 +28,6 @@ class WwkudiePlugin(Star):
         
         # 初始化配置管理器
         self._config = ConfigManager(context)
-        
-        # 初始化冷却管理器
-        self._cooldown = CooldownManager(
-            cooldown_seconds=self._config.get("cooldown_seconds", 30),
-            cleanup_interval=self._config.get("cleanup_interval", 3600),
-            enable_cooldown=self._config.get("enable_cooldown", True),
-            enable_rate_limit=self._config.get("enable_rate_limit", True),
-            rate_limit_count=self._config.get("rate_limit_count", 10),
-            rate_limit_window=self._config.get("rate_limit_window", 3600),
-        )
         
         # 初始化风格管理器
         self._style_manager = StyleManager()
@@ -63,25 +50,6 @@ class WwkudiePlugin(Star):
         )
         
         logger.info(f"尽孝插件 v{__version__} 已初始化")
-    
-    async def _check_permission(self, user_id: str) -> tuple[bool, Optional[str]]:
-        """
-        检查用户权限（冷却 + 限流）
-        
-        Returns:
-            (是否允许, 错误信息)
-        """
-        # 检查冷却
-        can_use, cooldown_remaining = await self._cooldown.check_cooldown(user_id)
-        if not can_use:
-            return False, f"⏳ 请稍等{cooldown_remaining}秒后再使用尽孝功能"
-        
-        # 检查限流
-        can_use, current_count, remaining = await self._cooldown.check_rate_limit(user_id)
-        if not can_use:
-            return False, f"🚫 您已达到使用上限（每小时{self._config.get('rate_limit_count', 10)}次），请{remaining}秒后再试"
-        
-        return True, None
     
     def _parse_article_args(self, content: str) -> tuple[str, str, str, str]:
         """
@@ -138,12 +106,6 @@ class WwkudiePlugin(Star):
         """尽孝命令 - 生成单篇文章"""
         user_id = event.get_sender_id()
         
-        # 权限检查
-        can_use, error_msg = await self._check_permission(user_id)
-        if not can_use:
-            yield event.plain_result(error_msg)
-            return
-        
         # 获取命令参数（AstrBot 已移除命令前缀）
         content = event.message_str.strip()
         
@@ -165,23 +127,6 @@ class WwkudiePlugin(Star):
                 "可用风格：/尽孝风格"
             )
             return
-        
-        # 验证输入
-        is_valid, error_msg = InputValidator.validate_article_input(
-            game_name=game_name,
-            event_desc=event_desc,
-            style=style,
-            custom_style=custom_style,
-            max_game_name_length=self._config.get("max_game_name_length", 50),
-            max_event_length=self._config.get("max_event_length", 500),
-            max_custom_style_length=self._config.get("max_custom_style_length", 200),
-        )
-        if not is_valid:
-            yield event.plain_result(f"❌ {error_msg}")
-            return
-        
-        # 记录请求
-        await self._cooldown.record_request(user_id)
         
         # 显示风格信息
         if style == "diy":
@@ -292,37 +237,11 @@ class WwkudiePlugin(Star):
     @filter.command("尽孝状态")
     async def wwkudie_status(self, event: AstrMessageEvent):
         """查看插件状态"""
-        user_id = event.get_sender_id()
-        
-        # 获取用户统计
-        user_stats = await self._cooldown.get_user_stats(user_id)
-        
         lines = [
             "📊 尽孝插件状态",
             f"\n版本: v{__version__}",
             f"作者: {__author__}",
-            f"\n您的状态:",
         ]
-        
-        if user_stats["is_cooldown_active"]:
-            lines.append(f"⏳ 冷却中，还需等待 {user_stats['cooldown_remaining']} 秒")
-        else:
-            lines.append("✅ 可以使用尽孝功能")
-        
-        lines.extend([
-            f"📈 当前窗口请求数: {user_stats['requests_in_window']}",
-            f"🎯 剩余可用次数: {user_stats['rate_limit_remaining']}",
-            f"📊 总请求次数: {user_stats['total_requests']}",
-        ])
-        
-        # 全局统计
-        global_stats = self._cooldown.get_global_stats()
-        lines.extend([
-            f"\n全局统计:",
-            f"👥 活跃用户数: {global_stats['tracked_users']}",
-            f"⏱️ 冷却时间: {global_stats['cooldown_seconds']}秒",
-            f"🎯 每小时限流: {global_stats['rate_limit_count']}次",
-        ])
         
         # 历史记录统计
         if self._config.get("enable_history", True):
@@ -373,12 +292,7 @@ class WwkudiePlugin(Star):
 /尽孝状态 - 查看插件和个人状态
 /尽孝风格 - 查看所有可用风格
 
-⚠️ 限制说明：
-• 游戏名最多50字
-• 事件描述最多500字
-• 自定义风格描述最多200字
-• 每次使用后有30秒冷却时间
-• 每小时最多使用10次
+⚠️ 使用说明：
 • 风格不填则使用默认风格
 
 ⚙️ 配置说明：

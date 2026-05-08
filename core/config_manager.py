@@ -14,21 +14,10 @@ class ConfigManager:
     
     # 默认配置
     DEFAULTS = {
-        "cooldown_seconds": 30,
-        "max_game_name_length": 50,
-        "max_event_length": 500,
-        "max_custom_style_length": 200,
-        "cleanup_interval": 3600,
-        "enable_cooldown": True,
         "default_style": "默认",
         "system_prompt": None,
         "enable_history": True,
         "max_history_per_user": 10,
-        "enable_stats": True,
-        "max_article_length": 2000,
-        "enable_rate_limit": True,
-        "rate_limit_count": 10,
-        "rate_limit_window": 3600,
     }
     
     def __init__(self, context: Any):
